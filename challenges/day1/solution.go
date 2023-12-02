@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -25,13 +26,21 @@ func Solution(filePath string) (int, error) {
 }
 
 func processLine(line string) int {
-	numbers := lineToNumbers(line)
-	digit1, digit2 := numbers[0], numbers[len(numbers)-1]
+	digit1 := FirstDigit(line)
+	digit2 := FirstDigit(Reverse(line))
 	parsed, err := strconv.Atoi(fmt.Sprint(digit1) + fmt.Sprint(digit2))
 	if err != nil {
 		panic(err)
 	}
 	return parsed
+}
+
+func Reverse(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
 }
 
 func lineToNumbers(line string) []int {
@@ -65,6 +74,7 @@ func lineToNumbers(line string) []int {
 		if !contains && i == j-1 {
 			i = j
 			j++
+			continue
 		}
 		if !contains {
 			i = j - 1
@@ -78,6 +88,15 @@ var wordToDigit = []struct {
 	word  string
 	value int
 }{
+	{word: "1", value: 1},
+	{word: "2", value: 2},
+	{word: "3", value: 3},
+	{word: "4", value: 4},
+	{word: "5", value: 5},
+	{word: "6", value: 6},
+	{word: "7", value: 7},
+	{word: "8", value: 8},
+	{word: "9", value: 9},
 	{word: "one", value: 1},
 	{word: "two", value: 2},
 	{word: "three", value: 3},
@@ -87,6 +106,36 @@ var wordToDigit = []struct {
 	{word: "seven", value: 7},
 	{word: "eight", value: 8},
 	{word: "nine", value: 9},
+	{word: "eno", value: 1},
+	{word: "owt", value: 2},
+	{word: "eerht", value: 3},
+	{word: "ruof", value: 4},
+	{word: "evif", value: 5},
+	{word: "xis", value: 6},
+	{word: "neves", value: 7},
+	{word: "thgie", value: 8},
+	{word: "enin", value: 9},
+}
+
+func FirstDigit(line string) int {
+	indices := []struct {
+		value int
+		index int
+	}{}
+	for _, val := range wordToDigit {
+		index := strings.Index(line, val.word)
+		if index == -1 {
+			continue
+		}
+		indices = append(indices, struct {
+			value int
+			index int
+		}{value: val.value, index: index})
+	}
+	sort.SliceStable(indices, func(i, j int) bool {
+		return indices[i].index < indices[j].index
+	})
+	return indices[0].value
 }
 
 func doesMatch(word string) (bool, bool, int) {
