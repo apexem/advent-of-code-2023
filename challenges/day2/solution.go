@@ -50,6 +50,38 @@ func Solution(filePath string) (int, error) {
 	return sum, nil
 }
 
+func Solution2(filePath string) (int, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	compiled, _ := regexp.Compile("(\\d+)\\s*(red|blue|green)")
+	sum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		match := compiled.FindAllString(line, -1)
+		max := map[string]int{
+			"red":   0,
+			"green": 0,
+			"blue":  0,
+		}
+		for _, match := range match {
+			split := strings.Fields(match)
+			val, _ := strconv.Atoi(split[0])
+			color := split[1]
+			if max[color] < val {
+				max[color] = val
+			}
+		}
+		power := max["red"] * max["green"] * max["blue"]
+		sum += power
+	}
+	return sum, nil
+}
+
 func getGameId(line string) int {
 	compiled, err := regexp.Compile("Game (?P<id>\\d+)")
 	if err != nil {
@@ -58,9 +90,4 @@ func getGameId(line string) int {
 	match := compiled.FindStringSubmatch(line)
 	parsed, _ := strconv.Atoi(match[1])
 	return parsed
-}
-
-type Set struct {
-	color      string
-	ocurrences int
 }
